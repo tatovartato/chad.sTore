@@ -7,6 +7,6 @@ class User(AbstractUser, TimeStampedModel):
     phone_number = models.CharField(max_length=32, unique=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['username', 'phone_number']
 
 
