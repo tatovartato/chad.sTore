@@ -2,43 +2,48 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-
-
+from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, UpdateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from products.models import Product, Review
 from products.serializers import ProductSerializer, ReviewSerializer
 
 
-@api_view(['GET', 'POST'])
-def products_view(request):
-    if request.method == 'GET':
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data)
+class ProductViewSet(RetrieveModelMixin, 
+                    CreateModelMixin,
+                    ListModelMixin,
+                    UpdateModelMixin,
+                    DestroyModelMixin,
+                    GenericAPIView):
+
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    def get(self, request, pk=None, *args, **kwargs):
+        if pk:
+            return self.retrieve(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
     
-    elif request.method == "POST":
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid():
-            product = serializer.save()
-            return Response({"id": product.id}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+    
+    
+    
+class ReviewViewSet(ListModelMixin, CreateModelMixin, GenericAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    
+    def get(self, request, pk=None, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
-@api_view(["GET"])
-def product_view(request, pk):
-    obj = get_object_or_404(Product, pk=pk)
-    serializer = ProductSerializer(obj)
-    return Response(serializer.data)
-
-@api_view(["GET", "POST"])
-def reviews_view(request):
-    if request.method == "GET":
-        serializer = ReviewSerializer(Review.objects.all(), many=True)
-        return Response(serializer.data)
-    elif request.method == "POST":
-        serializer = ReviewSerializer(data=request.data, context={'request': request})
-        
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)

@@ -1,8 +1,8 @@
 from django.urls import path
-from products.views import products_view, reviews_view, product_view
+from products.views import ProductViewSet, ReviewViewSet
 
 urlpatterns = [
-    path('products/', products_view, name="products"),
-    path('products/<int:pk>', product_view, name='product'),
-    path('reviews/', reviews_view, name="reviews")
+    path('products/', ProductViewSet.as_view(), name="products"),
+    path('products/<int:pk>', ProductViewSet.as_view(), name='product'),
+    path('reviews/', ReviewViewSet.as_view(), name="reviews")
 ]
