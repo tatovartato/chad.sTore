@@ -6,8 +6,19 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, UpdateModelMixin, RetrieveModelMixin, DestroyModelMixin
-from products.models import Product, Review, FavoriteProduct, Cart
-from products.serializers import ProductSerializer, ReviewSerializer, FavoriteProductSerializer, CartSerializer
+from products.models import (
+    Product,
+    Review,
+    FavoriteProduct,
+    Cart, ProductTag
+)
+from products.serializers import (
+    ProductSerializer,
+    ReviewSerializer,
+    FavoriteProductSerializer,
+    CartSerializer,
+    ProductTagSerializer
+    )
 
 
 class ProductViewSet(RetrieveModelMixin, 
@@ -19,6 +30,7 @@ class ProductViewSet(RetrieveModelMixin,
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
@@ -42,6 +54,7 @@ class ProductViewSet(RetrieveModelMixin,
 class ReviewViewSet(ListModelMixin, CreateModelMixin, GenericAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
     
     def get(self, request, pk=None, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -49,7 +62,7 @@ class ReviewViewSet(ListModelMixin, CreateModelMixin, GenericAPIView):
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)    
     
-class FavoriteProductViewSet(ListModelMixin, CreateModelMixin, GenericAPIView):
+class FavoriteProductViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericAPIView):
     queryset = FavoriteProduct.objects.all()
     serializer_class = FavoriteProductSerializer
     permission_classes = [IsAuthenticated]
@@ -58,13 +71,18 @@ class FavoriteProductViewSet(ListModelMixin, CreateModelMixin, GenericAPIView):
         queryset = self.queryset.filter(user=self.request.user)
         return queryset
     
-    def get(self, request, *args, **kwargs):
+    def get(self, request, pk=None, *args, **kwargs):
+        if pk:
+            return self.retrieve(request, *args, **kwargs)
         return self.list(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
     
-class CartViewSet(ListModelMixin, CreateModelMixin, GenericAPIView):
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+    
+class CartViewSet(ListModelMixin, CreateModelMixin, UpdateModelMixin, GenericAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
@@ -78,3 +96,12 @@ class CartViewSet(ListModelMixin, CreateModelMixin, GenericAPIView):
     
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+    
+    
+class TagList(ListModelMixin, GenericAPIView):
+    queryset = ProductTag.objects.all()
+    serializer_class = ProductTagSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
