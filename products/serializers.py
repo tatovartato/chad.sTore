@@ -33,13 +33,13 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
-    tags = ProductTagSerializer(many=True, read_only=True) 
     tag_ids = serializers.PrimaryKeyRelatedField(
         source="tags",
         queryset=ProductTag.objects.all(),
         many=True,
-        write_only=True, 
+        write_only=True
     )
+    tags = ProductTagSerializer(many=True, read_only=True)
     class Meta:
         exclude = ['created_at', 'updated_at'] 
         model = Product
@@ -51,7 +51,6 @@ class ProductSerializer(serializers.ModelSerializer):
         return product
 
     def update(self, instance, validated_data):
-        print(validated_data)
         tags = validated_data.pop("tags", None)
         if tags is not None:
             instance.tags.set(tags) 
@@ -107,5 +106,3 @@ class CartSerializer(serializers.ModelSerializer):
         cart.products.add(*products) 
 
         return cart
-    
-
