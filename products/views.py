@@ -62,7 +62,10 @@ class ReviewViewSet(ListModelMixin, CreateModelMixin, GenericAPIView):
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)    
     
-class FavoriteProductViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, GenericAPIView):
+class FavoriteProductViewSet(ListModelMixin,
+                            CreateModelMixin,
+                            RetrieveModelMixin,
+                            GenericAPIView):
     queryset = FavoriteProduct.objects.all()
     serializer_class = FavoriteProductSerializer
     permission_classes = [IsAuthenticated]
@@ -78,11 +81,12 @@ class FavoriteProductViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin
     
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
     
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+class CartViewSet(ListModelMixin, 
+                 CreateModelMixin,
+                 GenericAPIView):
     
-class CartViewSet(ListModelMixin, CreateModelMixin, UpdateModelMixin, GenericAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
@@ -96,7 +100,6 @@ class CartViewSet(ListModelMixin, CreateModelMixin, UpdateModelMixin, GenericAPI
     
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
-    
     
 class TagList(ListModelMixin, GenericAPIView):
     queryset = ProductTag.objects.all()
