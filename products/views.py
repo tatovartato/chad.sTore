@@ -10,14 +10,15 @@ from products.models import (
     Product,
     Review,
     FavoriteProduct,
-    Cart, ProductTag
+    Cart, ProductTag, ProductImage
 )
 from products.serializers import (
     ProductSerializer,
     ReviewSerializer,
     FavoriteProductSerializer,
     CartSerializer,
-    ProductTagSerializer
+    ProductTagSerializer,
+    ProductImageSerializer
     )
 
 
@@ -108,3 +109,28 @@ class TagList(ListModelMixin, GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+    
+class ProductImageViewSet(ListModelMixin,
+                          CreateModelMixin,
+                          DestroyModelMixin,
+                          RetrieveModelMixin,
+                          GenericAPIView):
+    queryset = ProductImage.objects.all()
+    serializer_class = ProductImageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(product__id=self.kwargs['product_id'])
+    
+
+    def get(self, request, pk=None, *args, **kwargs):
+        if pk:
+            return self.retrieve(request, *args, **kwargs)
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+    

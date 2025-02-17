@@ -14,6 +14,9 @@ class Product(TimeStampedModel, models.Model):
     def average_rating(self):
         pass
 
+    def __str__(self):
+        return f"{self.name}"
+
 
 class Review(TimeStampedModel, models.Model):
     product = models.ForeignKey('products.Product', related_name='reviews', on_delete=models.CASCADE)
@@ -30,11 +33,14 @@ class FavoriteProduct(TimeStampedModel, models.Model):
 class ProductTag(TimeStampedModel, models.Model):
     name = models.CharField(max_length=255, unique=True)
 
+    def __str__(self):
+        return f"{self.name}"
+
 
 class Cart(TimeStampedModel, models.Model):
     products = models.ManyToManyField('products.Product', related_name='carts')
     user = models.OneToOneField('users.User', related_name='cart', on_delete=models.SET_NULL, null=True, blank=True)
-
+    
 
 class ProductImage(TimeStampedModel, models.Model):
     image = models.ImageField(upload_to='products/')
