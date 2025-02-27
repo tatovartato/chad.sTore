@@ -1,35 +1,23 @@
-
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import GenericAPIView
-from rest_framework.mixins import  ListModelMixin, RetrieveModelMixin
+from rest_framework.viewsets import GenericViewSet
+from rest_framework import mixins 
 from categories.serializers import CategorySerializer, CategoryDetailSerializer, CategoryImageSerializer
 from categories.models import Category, CategoryImage
 
-class CategoryListView(ListModelMixin, GenericAPIView):
+class CategoryViewSet(mixins.ListModelMixin, GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-    
-class CategoryDetailView(RetrieveModelMixin,GenericAPIView):
+class CategoryDetailView(mixins.RetrieveModelMixin, GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategoryDetailSerializer
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-class CategoryImageListView(ListModelMixin,GenericAPIView):
+class CategoryImageViewSet(mixins.ListModelMixin, GenericViewSet):
     queryset = CategoryImage.objects.all()
     serializer_class = CategoryImageSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return self.queryset.filter(category=self.kwargs['category_id'])
-
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
+        return self.queryset.filter(category=self.kwargs['category_pk'])
