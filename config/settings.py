@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     "products",
     "categories",
 
-    'rest_framework'
+    "django-filters",
+    "rest_framework"
 ]
 
 MIDDLEWARE = [
@@ -133,3 +134,10 @@ AUTH_USER_MODEL = 'users.User'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'chad.sTore.pagination.ProductPagination',
+    'PAGE_SIZE': 10
+
+}

@@ -1,3 +1,6 @@
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
+from .pagination import ProductPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import mixins   
@@ -16,6 +19,7 @@ from products.serializers import (
     ProductImageSerializer
     )
 
+
 class ProductViewSet(mixins.CreateModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin,
@@ -26,6 +30,9 @@ class ProductViewSet(mixins.CreateModelMixin,
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
+    filterset_fields = ['categories', 'price']
+    search_fields = ['name', 'description']
+    pagination_class = ProductPagination
 
 class ReviewViewSet(mixins.ListModelMixin,
                     mixins.CreateModelMixin,
@@ -33,6 +40,7 @@ class ReviewViewSet(mixins.ListModelMixin,
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticated]
+    filterset_fields = ['rating']
 
     def get_queryset(self, *args, **kwargs):
         return self.queryset.filter(product_id=self.kwargs['product_id'])

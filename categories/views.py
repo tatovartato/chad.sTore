@@ -1,3 +1,4 @@
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import mixins 
@@ -8,6 +9,7 @@ class CategoryViewSet(mixins.ListModelMixin, GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
+    search_fields = ['name']
 
 class CategoryDetailView(mixins.RetrieveModelMixin, GenericViewSet):
     queryset = Category.objects.all()
