@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "products",
     "categories",
 
-    "django-filters",
+    "django_filters",
     "rest_framework"
 ]
 
@@ -136,8 +136,3 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'chad.sTore.pagination.ProductPagination',
-    'PAGE_SIZE': 10
-
-}
