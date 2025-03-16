@@ -1,12 +1,10 @@
 from rest_framework import serializers
 from products.models import Review, Product, FavoriteProduct, Cart, ProductTag, ProductImage, CartItem
-
-
+        
 class ProductTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductTag
         fields = ['id', 'name']
-
 
 class ReviewSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField(write_only=True)
@@ -87,8 +85,6 @@ class FavoriteProductSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("This product is already in favorites.")
 
         return favorite
-
-
     
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -139,4 +135,3 @@ class CartSerializer(serializers.ModelSerializer):
     
     def get_total(self, obj):
         return sum(item.total_price() for item in obj.items.all() if item.total_price())
-    

@@ -2,21 +2,24 @@ from django.db import models
 from django.core.validators import MaxValueValidator
 from config.model_utils.models import TimeStampedModel
 from products.choices import Currency
+from django.conf import settings
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
 
-class Product(TimeStampedModel, models.Model):
+class Product(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.FloatField()
     currency = models.CharField(max_length=255, choices=Currency.choices, default=Currency.GEL)
     tags = models.ManyToManyField("products.ProductTag", related_name='products', blank=True)
     quantity = models.PositiveIntegerField()
-
-    def average_rating(self):
-        pass
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.name}"
-
 
 class Review(TimeStampedModel, models.Model):
     product = models.ForeignKey('products.Product', related_name='reviews', on_delete=models.CASCADE)

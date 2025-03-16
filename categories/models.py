@@ -8,10 +8,7 @@ class Category(TimeStampedModel, models.Model):
     def __str__(self):
         return f"{self.name}"
 
-    
-
 class CategoryImage(TimeStampedModel, models.Model):
     image = models.ImageField(upload_to='categories/')
-    product = models.ForeignKey('categories.Category', related_name='images', on_delete=models.CASCADE)
+    category = models.ForeignKey('categories.Category', related_name='images', on_delete=models.CASCADE)
     is_active = models.BooleanField(default= False)
-

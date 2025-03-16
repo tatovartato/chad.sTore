@@ -5,6 +5,7 @@ from products.views import (
     ProductViewSet, ReviewViewSet, FavoriteProductViewSet, 
     CartViewSet, TagViewSet, ProductImageViewSet, CartItemViewSet
 )
+
 router = DefaultRouter()
 router.register('products', ProductViewSet)
 router.register('cart', CartViewSet)
@@ -13,13 +14,10 @@ router.register('favorite_products', FavoriteProductViewSet, basename='favorite_
 router.register('cart_items', CartItemViewSet, basename='cart-items')
 
 products_router = routers.NestedDefaultRouter(router, 'products', lookup='product')
-products_router.register('reviews', ReviewViewSet, basename='produc-treviews')
+products_router.register('reviews', ReviewViewSet, basename='product-reviews')
 products_router.register('images', ProductImageViewSet, basename='product-images')
 
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(products_router.urls)),
 ]
-
-
-
