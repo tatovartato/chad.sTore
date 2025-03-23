@@ -7,7 +7,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import mixins
 from rest_framework.exceptions import PermissionDenied
-
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.core.validators import ValidationError
+from rest_framework.response import Response
+from rest_framework import status
 from products.models import Product, Review, FavoriteProduct, Cart, ProductTag, ProductImage, CartItem
 from products.serializers import (ProductSerializer, 
                                   ReviewSerializer,
@@ -19,6 +22,7 @@ from products.serializers import (ProductSerializer,
 from products.permissions import IsObjectOwnerOrReadOnly
 from products.pagination import ProductPagination
 from products.filters import ProductFilter
+
 
 class ProductViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin, mixins.DestroyModelMixin,
@@ -75,11 +79,19 @@ class TagViewSet(mixins.ListModelMixin, GenericViewSet):
 
 class ProductImageViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
                           mixins.ListModelMixin, GenericViewSet):
+    queryset = ProductImage.objects.all()
+    parser_classes = [MultiPartParser, FormParser]
     serializer_class = ProductImageSerializer
     permission_classes = [IsAuthenticated, IsObjectOwnerOrReadOnly]
 
     def get_queryset(self):
         return ProductImage.objects.filter(product_id=self.kwargs.get('product_pk', 0))
+    
+    def create(self, request, *args, **kwargs):
+        try:
+            super().create(request, *args, **kwargs)
+        except ValidationError as e:
+            return Response ({"error":f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
     
 class CartItemViewSet(ModelViewSet):
     serializer_class = CartItemSerializer

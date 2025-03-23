@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer, RegisterSerializer, ProfileSerializer
-from products.permissions import IsOwnerOrReadOnly
+from products.permissions import IsObjectOwnerOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
@@ -22,12 +22,11 @@ class UserViewSet(mixins.ListModelMixin,
 
 class ProfilViewSet(mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
-                    mixins.PartialUpdateModelMixin,
                     mixins.DestroyModelMixin,
                     viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = ProfileSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated, IsObjectOwnerOrReadOnly]
 
     def get_object(self):
         return self.request.user

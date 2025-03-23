@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from config.utils.image_validators import validate_image_size, validate_image_resolution, validate_image_count
 
 class Product(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='products')
@@ -17,9 +18,11 @@ class Product(models.Model):
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name}, {self.id}"
+
+
 
 class Review(TimeStampedModel, models.Model):
     product = models.ForeignKey('products.Product', related_name='reviews', on_delete=models.CASCADE)
@@ -46,11 +49,18 @@ class Cart(TimeStampedModel, models.Model):
     products = models.ManyToManyField('products.Product', related_name='carts')
     user = models.OneToOneField('users.User', related_name='cart', on_delete=models.SET_NULL, null=True, blank=True)
     
-
 class ProductImage(TimeStampedModel, models.Model):
-    image = models.ImageField(upload_to='products/')
+    image = models.ImageField(upload_to='products/', validators=[validate_image_resolution,validate_image_size])
     product = models.ForeignKey('products.Product', related_name='images', on_delete=models.CASCADE)
     
+    def clean(self):
+        if self.product_id:
+            validate_image_count(self.product_id)
+        super().clean()
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)   
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
