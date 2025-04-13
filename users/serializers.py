@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
+from users.models import EmailVerificationCode
 
 User = get_user_model()
 
@@ -19,7 +20,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields =  ['id', 'username', 'email', 'first_name', 'last_name', 'password', 'password2']
+        fields =  ['id', 'username', 'phone_number','email', 'first_name', 'last_name', 'password', 'password2']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -30,6 +31,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password2')
         validated_data['password'] = make_password(validated_data['password'])
         user = User.objects.create(**validated_data)
+        user.is_active = False
+        user.save()
         return user
 
 
@@ -92,3 +95,39 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         user = self.validated_data["user"]
         user.set_password(self.validated_data["password"])
         user.save()
+
+class EmailResendCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    
+    def validate(self, attrs):
+        email = attrs.get('email')
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({"message":"User Not Found"})
+        attrs['user'] = user 
+        return attrs
+    
+class EmailCodeConfirmSerializer(serializers.Serializer):
+    email = serializers.EmailField() 
+    code = serializers.CharField()
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        code = attrs.get('code')
+
+        try:
+            user = User.objects.get(email=email)
+            verification = EmailVerificationCode.objects.filter(user=user).first()
+
+            if not verification.code == code:
+                raise serializers.ValidationError({"message": "code is incorrect"})
+        
+            if verification.is_expired():
+                raise serializers.ValidationError({"message": "code is expired"})
+        except (User.DoesNotExist, EmailVerificationCode.DoesNotExist):
+            raise serializers.ValidationError({"message": "user or its code not found"})
+    
+        attrs['user'] = user
+        return attrs
+
