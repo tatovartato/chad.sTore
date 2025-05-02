@@ -17,6 +17,7 @@ from drf_yasg import openapi
 from django.utils import timezone
 from datetime import timedelta
 import random   
+from config.celery import app
 
 User = get_user_model()
 
@@ -46,7 +47,8 @@ class RegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         subject ="Your verification code"
         message = f"Hello {user.username},\nYour verification code is: {code}"
 
-        send_mail(subject, message, 'no_replay@example.com', [user.email] )
+        # send_mail(subject, message, 'no_replay@example.com', [user.email] )
+        app.send_task('users.tasks.send_email_async',args=[subject, message, user.email])
     
     @action(detail=False, methods=["post"], url_path="resend_code", serializer_class=EmailResendCodeSerializer)
     def resend_code(self, request):
@@ -120,14 +122,10 @@ class PasswordResetRequestViewSet(mixins.CreateModelMixin, viewsets.GenericViewS
                 reverse("password_reset_confirm", kwargs={"uidb64":uid, "token":token})
             )
 
-            send_mail(
-                "password recovery",
-                f"click the url to reset your password: {reset_url}",
-                "noreply@example.com",
-                [user.email],
-                fail_silently=False
-            )
+            subject = "password recovery"
+            message = f"click the url to reset your password: {reset_url}"
 
+            app.send_task('users.tasks.send_email_async',args=[subject, message, user.email])
             return Response(
                 {"message":"link sent to email"}, status=status.HTTP_200_OK
             )
